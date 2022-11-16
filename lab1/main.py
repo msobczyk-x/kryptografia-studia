@@ -6,8 +6,10 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Caesar, affine cipher - encrypt, decrypt', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-affine_a = []
-affine_b = []
+
+affine_a_coprime = [1,3,5,7,9,11,15,17,19,21,23,25]
+
+
 
 parser.add_argument('-e', '--encrypt', action="store_true", help='encrypt file (pass a plain text file)')
 parser.add_argument('-d', '--decrypt', action="store_true", help='decrypt file (pass a encrypted file)' )
@@ -174,11 +176,11 @@ if __name__ == "__main__":
                 print("Decrypted text: ", decrypted_text)
                 result += "\nShift: " + str(i) + " // Decrypted text:" + decrypted_text
         if (args.affine):
-            for i in range(1,26):
-                for j in range(1,26):
+            for i in affine_a_coprime:
+                for j in range(0,26):
                     decrypted_text = affine_decrypt(text, i, j)
                     print("Decrypted text: ", decrypted_text)
-                    result += "\nShift: " + str(i) + " // Decrypted text:" + decrypted_text
+                    result += "\nA: " + str(i) + " B: " + str(j) + " // Decrypted text:" + decrypted_text
         print("Decrypted text saved to decrypt.txt")
         file_write(result, "decrypt.txt")
         
