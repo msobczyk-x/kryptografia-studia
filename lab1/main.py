@@ -202,8 +202,8 @@ if __name__ == "__main__":
             print("Affine cipher - known-plaintext attack")
             text = file_read("crypto.txt")
             known_text = file_read("extra.txt")
-            for a in range(1,26):
-                for b in range(1,26):
+            for a in affine_a_coprime:
+                for b in range(0,26):
                     decrypted_text = affine_decrypt(text, a, b)
                     if known_text in decrypted_text:
                         print("Decrypted text: ", decrypted_text)
