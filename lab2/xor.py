@@ -118,6 +118,7 @@ def find_key(text):
     for i in range(0, len(text), key_length):
         key_blocks.append(text[i : i + key_length])
     
+    # Transpose blocks
     single_encrypted_blocks = [list(filter(None, i)) for i in zip_longest(*key_blocks)]
     for block in single_encrypted_blocks:
         key_n = check_possible_keys(block)
