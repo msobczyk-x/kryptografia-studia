@@ -9,7 +9,6 @@ parser = argparse.ArgumentParser(
     description="Xor encryption", formatter_class=argparse.ArgumentDefaultsHelpFormatter
 )
 
-
 parser.add_argument(
     "-e", "--encrypt", action="store_true", help="encrypt file (pass a plain text file)"
 )
@@ -65,27 +64,27 @@ def prepare_text(text):
             final += " "
     return final
 
-#read key from file
+# Read key from file
 def read_key():
     key = file_read("key.txt")
-    return key
+    return key.split("\n")[0]
 
-#encrypt text with key
+# Encrypt text with key
 def encrypt_xor(text, key):
     encrypted = ""
     for i in range(len(text)):
         encrypted += chr(ord(text[i]) ^ ord(key[i % len(key)]))
     return encrypted
 
-# decrypt text with key
+# Decrypt text with key
 def decrypt_xor(text, key):
     decrypted = ""
     for i in range(len(text)):
         decrypted += chr(ord(text[i]) ^ ord(key[i % len(key)]))
     return decrypted
 
-#assign score to letters with most frequent letters in english
-def assign_score(output_string):
+# Assign score to letters with most frequent letters in english
+def score_assign(output_string):
     string_score = 0
     #https://en.wikipedia.org/wiki/Etaoin_shrdlu
     freq = [" ", "e", "t", "a", "o", "i", "n", "s", "h", "r", "d", "l", "u"]
@@ -94,38 +93,39 @@ def assign_score(output_string):
             string_score += 1
     return string_score
 
-#check all possible keys and find the best one
-def XOR_decode_bytes(encoded_array):
+# Check all possible keys and find the best one
+def check_possible_keys(encoded_array):
     last_score = 0
     greatest_score = 0
+    # Xor strings with all possible keys and determine score 
     for n in range(128):  # 128 ASCII characters
         xord_str = [byte ^ n for byte in encoded_array]
         xord_ascii = ("").join([chr(b) for b in xord_str])
-        last_score = assign_score(xord_ascii)
+        last_score = score_assign(xord_ascii)
         if last_score > greatest_score:
             greatest_score = last_score
             key = n
     return key
 
-#find key 
-#make an array of encrypted text
-#check all possible keys for every char in array and picking best one
-def find_key(key_length, text):
-    key_blocks = [
-        text[start : start + key_length] for start in range(0, len(text), key_length)
-    ]
-    # transpose the 2D matrix
+# Find key 
+# Make an array of encrypted text
+# Check all possible keys for every char in array and picking best one
+def find_key(text):
+    key_length = 64
+    key_blocks = []
     key = []
-    single_XOR_blocks = [list(filter(None, i)) for i in zip_longest(*key_blocks)]
-    for block in single_XOR_blocks:
-        key_n = XOR_decode_bytes(block)
+    # Divide text into 64 char blocks
+    for i in range(0, len(text), key_length):
+        key_blocks.append(text[i : i + key_length])
+    
+    single_encrypted_blocks = [list(filter(None, i)) for i in zip_longest(*key_blocks)]
+    for block in single_encrypted_blocks:
+        key_n = check_possible_keys(block)
         key.append(key_n)
+    str_key = "".join([chr(c) for c in key])
+    return str_key
 
-    ascii_key = "".join([chr(c) for c in key])
-
-    return ascii_key
-
-
+# Main
 if __name__ == "__main__":
     args = parser.parse_args()
 
@@ -143,12 +143,13 @@ if __name__ == "__main__":
         print("Encrypted successfully !")
 
     elif args.k:
-        print("Brute force attack")
+        print("Cryptanalysis started...")
         with open("crypto.txt", "rb") as f:
             crypto = f.read()
-        key = find_key(64, crypto)
+        key = find_key(crypto)
         file_write(decrypt_xor(crypto.decode(), key), "decrypt.txt")
-        print(key)
+        print("Key: ", key)
+        print("Decrypted successfully !")
 
     else:
         print("No arguments passed, try -h for help")
